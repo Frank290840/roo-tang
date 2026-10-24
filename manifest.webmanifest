@@ -1,0 +1,30 @@
+{
+  "name": "รู้ตังค์ · Roo Tang",
+  "short_name": "รู้ตังค์",
+  "description": "รู้กะ รู้ OT รู้เงินเดือน — ตารางกะทีมและคำนวณเงินเดือน",
+  "lang": "th",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#14275C",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
