@@ -933,12 +933,12 @@ function forgotPin(){
   $('#fp-back').onclick=showLock;$('#fp-wipe').onclick=()=>{state=fresh(false);save();onboarding(1);};
 }
 let ob={};
-function onboarding(step){
-  const me=state.me,ac=state.account||{};if(step===1)ob={nick:ac.nick||'',en:ac.en||(state.profile&&state.profile.en)||'',color:ac.color||SWATCH[0],photo:ac.photo||null,group:me.group,payType:me.payType,salary:me.salary||'',dayWage:me.dayWage||'',fundPct:me.fundPct||'',kys:me.kys||''};
+function onboarding(step,keep){
+  const me=state.me,ac=state.account||{};if(step===1&&!keep)ob={nick:ac.nick||'',en:ac.en||(state.profile&&state.profile.en)||'',color:ac.color||SWATCH[0],photo:ac.photo||null,group:me.group,payType:me.payType,salary:me.salary||'',dayWage:me.dayWage||'',fundPct:me.fundPct||'',kys:me.kys||''};
   const steps=`<div class="steps">${[1,2,3,4].map(i=>`<i class="${i<=step?'on':''}"></i>`).join('')}</div>`;
   const back=step>1?`<button class="btn sm" id="ob-back" style="align-self:flex-start">‹ ย้อนกลับ</button>`:`<div style="display:flex;align-items:center;gap:10px">${LOGO_SM.replace('<svg','<svg style="width:40px;height:40px;border-radius:10px"')}<b style="font-size:18px;color:var(--navy)">รู้ตังค์</b></div>`;
   if(step===4&&state.account&&state.account.setup&&state.account.pinHash){closeGate();state.ui.tab='acct';render();toast('บันทึกโปรไฟล์แล้ว');return;}
-  if(step===4){pinSetup(()=>{state.account={...state.account,setup:true};save();unlocked=true;closeGate();state.ui.tab='home';render();toast('ตั้งบัญชีเรียบร้อย ยินดีต้อนรับ');},()=>onboarding(3),'ตั้งรหัส PIN 6 หลัก','ใช้ทุกครั้งที่เปิดแอป');return;}
+  if(step===4){pinSetup(()=>{state.account={...state.account,setup:true};save();unlocked=true;closeGate();state.ui.tab='home';render();toast('ตั้งบัญชีเรียบร้อย ยินดีต้อนรับ');},()=>onboarding(3,true),'ตั้งรหัส PIN 6 หลัก','ใช้ทุกครั้งที่เปิดแอป');return;}
   let body='';
   if(step===1)body=`<h2>ยินดีต้อนรับสู่<br>รู้ตังค์</h2><p>ตั้งบัญชีของคุณ ข้อมูลทั้งหมดเก็บในมือถือเครื่องนี้เท่านั้น</p>
     <div style="display:flex;justify-content:center;padding:6px 0"><span id="ob-av"></span></div>
@@ -956,18 +956,18 @@ function onboarding(step){
     [['#ob-sal','salary'],['#ob-wage','dayWage'],['#ob-fund','fundPct'],['#ob-kys','kys']].forEach(([s,k])=>{const x=g.querySelector(s);if(x)ob[k]=x.value;});};
   const drawAv=()=>{const a=g.querySelector('#ob-av');if(a)a.innerHTML=`<span class="av" style="width:88px;height:88px;font-size:34px;border:none;${ob.photo?`background-image:url(${ob.photo})`:`background:${ob.color}`}">${ob.photo?'':esc((ob.nick||'?').trim().charAt(0).toUpperCase())}</span>`;};
   drawAv();
-  g.querySelectorAll('.swatches [data-c]').forEach(b=>b.onclick=()=>{sync();ob.color=b.dataset.c;ob.photo=null;onboarding(1);});
-  const ph=g.querySelector('#ob-photo');if(ph)ph.onchange=e=>{const f=e.target.files[0];if(!f)return;const img=new Image();img.onload=()=>{const cv=document.createElement('canvas');cv.width=cv.height=160;const s=Math.min(img.width,img.height);cv.getContext('2d').drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,160,160);sync();ob.photo=cv.toDataURL('image/jpeg',.82);onboarding(1);};img.src=URL.createObjectURL(f);};
-  const np=g.querySelector('#ob-nophoto');if(np)np.onclick=()=>{sync();ob.photo=null;onboarding(1);};
+  g.querySelectorAll('.swatches [data-c]').forEach(b=>b.onclick=()=>{sync();ob.color=b.dataset.c;ob.photo=null;onboarding(1,true);});
+  const ph=g.querySelector('#ob-photo');if(ph)ph.onchange=e=>{const f=e.target.files[0];if(!f)return;const img=new Image();img.onload=()=>{const cv=document.createElement('canvas');cv.width=cv.height=160;const s=Math.min(img.width,img.height);cv.getContext('2d').drawImage(img,(img.width-s)/2,(img.height-s)/2,s,s,0,0,160,160);sync();ob.photo=cv.toDataURL('image/jpeg',.82);onboarding(1,true);};img.onerror=()=>toast('เปิดรูปนี้ไม่ได้ ลองรูปอื่น หรือถ่ายภาพหน้าจอรูปนั้นแล้วเลือกใหม่');img.src=URL.createObjectURL(f);};
+  const np=g.querySelector('#ob-nophoto');if(np)np.onclick=()=>{sync();ob.photo=null;onboarding(1,true);};
   const nk=g.querySelector('#ob-nick');if(nk)nk.oninput=()=>{ob.nick=nk.value;drawAv();};
   g.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{ob.group=b.dataset.g;g.querySelectorAll('[data-g]').forEach(x=>x.setAttribute('aria-pressed',x===b));});
-  g.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{sync();ob.payType=b.dataset.pt;onboarding(3);});
-  const bk=g.querySelector('#ob-back');if(bk)bk.onclick=()=>{sync();onboarding(step-1);};
+  g.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{sync();ob.payType=b.dataset.pt;onboarding(3,true);});
+  const bk=g.querySelector('#ob-back');if(bk)bk.onclick=()=>{sync();onboarding(step-1,true);};
   const commit=()=>{const num=v=>{const n=parseFloat(String(v).replace(/,/g,''));return isFinite(n)?n:0;};
     state.account={...(state.account||{}),nick:ob.nick.trim(),en:ob.en.trim(),color:ob.color,photo:ob.photo};
     state.me={...state.me,group:ob.group,payType:ob.payType,salary:num(ob.salary),dayWage:num(ob.dayWage),fundPct:num(ob.fundPct),kys:num(ob.kys)};save();};
-  g.querySelector('#ob-next').onclick=()=>{sync();if(step===1&&!ob.nick.trim()){toast('ใส่ชื่อเล่นก่อนนะ');return;}commit();onboarding(step+1);};
-  const sk=g.querySelector('#ob-skip');if(sk)sk.onclick=()=>{sync();ob.salary=ob.salary||'';commit();onboarding(4);};
+  g.querySelector('#ob-next').onclick=()=>{sync();if(step===1&&!ob.nick.trim()){toast('ใส่ชื่อเล่นก่อนนะ');return;}commit();onboarding(step+1,true);};
+  const sk=g.querySelector('#ob-skip');if(sk)sk.onclick=()=>{sync();ob.salary=ob.salary||'';commit();onboarding(4,true);};
 }
 function pinSetup(done,cancel,title,sub){
   pinPad({title,sub,onDone:(p1)=>{pinPad({title:'ใส่รหัสอีกครั้ง',sub:'เพื่อยืนยัน',onDone:async(p2,fail)=>{if(p1!==p2){fail('รหัสไม่ตรงกัน ลองใหม่');setTimeout(()=>pinSetup(done,cancel,title,sub),900);return;}
